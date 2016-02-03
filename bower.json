@@ -25,7 +25,7 @@
     "tests"
   ],
   "dependencies": {
-    "q": "^2.0.2",
+    "q": "^1.4.1",
     "breeze-client": "^1.5.4",
     "breeze-client-labs": "^1.5.8"
   }
