@@ -10,13 +10,21 @@ var BreezeArrow;
     var ArrowAdapter = (function (_super) {
         __extends(ArrowAdapter, _super);
         function ArrowAdapter() {
+            _super.call(this);
             this.name = 'arrowAdapter';
+            this.hasServerMetadata = false;
         }
         ArrowAdapter.prototype.initialize = function () {
             // do something
         };
         ArrowAdapter.prototype.fetchMetadata = function () {
-            return Q.resolve();
+            return Q();
+        };
+        ArrowAdapter.prototype._prepareSaveBundle = function (saveContext, saveBundle) {
+            return {};
+        };
+        ArrowAdapter.prototype._prepareSaveResult = function (saveContext, data) {
+            return {};
         };
         return ArrowAdapter;
     })(breeze.AbstractDataServiceAdapter);
