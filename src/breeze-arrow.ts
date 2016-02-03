@@ -32,7 +32,7 @@ module BreezeArrow {
         }
 
         fetchMetadata() {
-            return Q();
+            return Q.when();
         }
 
         _prepareSaveBundle(saveContext: Object, saveBundle: Object) {

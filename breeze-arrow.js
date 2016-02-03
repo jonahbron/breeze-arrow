@@ -18,7 +18,7 @@ var BreezeArrow;
             // do something
         };
         ArrowAdapter.prototype.fetchMetadata = function () {
-            return Q();
+            return Q.when();
         };
         ArrowAdapter.prototype._prepareSaveBundle = function (saveContext, saveBundle) {
             return {};
