@@ -1,0 +1,27 @@
+{
+  "name": "breeze-arrow",
+  "description": "Breeze JS data service adapter for connecting to Node applications built with the Appcelerator Arrow framework",
+  "main": "breeze-arrow.js",
+  "authors": [
+    "Jonah Dahlquist <jonah@limelighthealth.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "breeze",
+    "breezejs",
+    "arrow",
+    "arrowdb",
+    "appcelerator"
+  ],
+  "homepage": "https://github.com/jonahbron/breeze-arrow",
+  "moduleType": [
+    "globals"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

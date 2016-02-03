@@ -1,0 +1,14 @@
+{
+  "name": "breeze-arrow",
+  "version": "0.0.0",
+  "description": "Breeze JS data service adapter for connecting to Node applications built with the Appcelerator Arrow framework",
+  "keywords": ["breeze", "breezejs", "arrow", "arrowdb", "appcelerator"],
+  "homepage": "https://github.com/jonahbron/breeze-arrow",
+  "repository": "jonahbron/breeze-arrow",
+  "license": "MIT",
+  "author": "Jonah Dahlquist <jonah@limelighthealth.com>",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-typescript": "^2.10.0"
+  }
+}
