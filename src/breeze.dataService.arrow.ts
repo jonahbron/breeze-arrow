@@ -5,21 +5,23 @@ interface AbstractDataServiceAdapter {
 interface Breeze {
     AbstractDataServiceAdapter: AbstractDataServiceAdapter;
     config: any;
+    EntityType: any;
 }
 
 interface Window {
-    Q: Function;
+    Q: any;
     breeze: Breeze;
 }
 
 module BreezeArrow {
 
-    var Q: Function = window.Q;
+    var Q: any = window.Q;
     var breeze: Breeze = window.breeze;
 
     class ArrowAdapter extends breeze.AbstractDataServiceAdapter {
         name: string;
         hasServerMetadata: boolean;
+        xhr: any;
 
         constructor() {
             super();
@@ -28,7 +30,7 @@ module BreezeArrow {
         }
 
         initialize() {
-            // do something
+            this.xhr = breeze.config.getAdapterInstance('ajax');
         }
 
         fetchMetadata() {
@@ -45,4 +47,5 @@ module BreezeArrow {
     }
 
     breeze.config.registerAdapter('dataService', ArrowAdapter);
+
 }
