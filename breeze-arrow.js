@@ -20,10 +20,74 @@ var BreezeArrow;
         ArrowAdapter.prototype.fetchMetadata = function () {
             return Q.when();
         };
+        ArrowAdapter.prototype.executeQuery = function (mappingContext) {
+            var adapter = mappingContext.adapter = this;
+            var deferred = Q.defer();
+            var url = mappingContext.getUrl();
+            var params = {
+                type: 'GET',
+                url: url,
+                params: mappingContext.query.parameters,
+                dataType: 'json',
+                success: function (httpResponse) {
+                    var data = httpResponse.data;
+                    try {
+                        var results = data[data.key];
+                        if (results) {
+                            deferred.resolve({ results: results, httpResponse: httpResponse });
+                        }
+                        else {
+                            deferred.resolve({ results: data, httpResponse: httpResponse });
+                        }
+                    }
+                    catch (error) {
+                        deferred.reject(error);
+                    }
+                },
+                error: deferred.reject.bind(deferred)
+            };
+            if (mappingContext.dataService.useJsonp) {
+                params.dataType = 'jsonp';
+                params.crossDomain = true;
+            }
+            this.xhr.ajax(params);
+            return deferred.promise;
+        };
+        ArrowAdapter.prototype.saveChanges = function (saveContext, saveBundle) {
+            var adapter = saveContext.adapter = this;
+            var deferred = Q.defer();
+            saveBundle = adapter._prepareSaveBundle(saveContext, saveBundle);
+            return Q.all(saveBundle.map(function (entity) {
+                var bundle = JSON.stringify(saveBundle);
+                var url = saveContext.dataService.qualifyUrl(saveContext.resourceName);
+                console.log(url);
+                this.xhr.ajax({
+                    type: 'PUT',
+                    url: url,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: bundle,
+                    success: function (httpResponse) {
+                        httpResponse.saveContext = saveContext;
+                        var data = httpResponse.data;
+                        var saveResult = adapter._prepareSaveResult(saveContext, data);
+                        saveResult.httpResponse = httpResponse;
+                        deferred.resolve(saveResult);
+                    },
+                    error: function (httpResponse) {
+                        httpResponse.saveContext = saveContext;
+                        deferred.reject(httpResponse);
+                    }
+                });
+                return deferred.promise;
+            }));
+        };
+        ;
         ArrowAdapter.prototype._prepareSaveBundle = function (saveContext, saveBundle) {
-            return {};
+            return saveBundle.entities;
         };
         ArrowAdapter.prototype._prepareSaveResult = function (saveContext, data) {
+            console.log('data', data);
             return {};
         };
         return ArrowAdapter;
