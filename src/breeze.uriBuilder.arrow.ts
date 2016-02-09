@@ -24,6 +24,14 @@ module BreezeArrow {
 
             url += 'where=' + encodeURIComponent(JSON.stringify(where));
 
+            if (entityQuery.skipCount) {
+                url += '&skip=' + entityQuery.skipCount;
+            }
+
+            if (entityQuery.takeCount) {
+                url += '&limit=' + entityQuery.takeCount;
+            }
+
             return url;
         }
     }

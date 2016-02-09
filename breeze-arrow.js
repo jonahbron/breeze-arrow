@@ -46,6 +46,12 @@ var BreezeArrow;
             var where = entityQuery.wherePredicate.visit({ entityType: entityType }, fragmentVisitor);
             var url = entityQuery.resourceName + '/query?';
             url += 'where=' + encodeURIComponent(JSON.stringify(where));
+            if (entityQuery.skipCount) {
+                url += '&skip=' + entityQuery.skipCount;
+            }
+            if (entityQuery.takeCount) {
+                url += '&limit=' + entityQuery.takeCount;
+            }
             return url;
         };
         return UriBuilderArrowAdapter;
@@ -84,13 +90,10 @@ var BreezeArrow;
             var predicates = this.preds.map(function (predicate) {
                 return predicate.visit(context);
             });
-            console.log(predicates);
             if (this.op.key === 'and') {
-                console.log('and');
                 return _.merge.apply(_, predicates);
             }
             else if (this.op.key === 'or') {
-                console.log('or');
                 return { $or: predicates };
             }
         },
