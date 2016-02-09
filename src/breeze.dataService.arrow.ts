@@ -11,6 +11,7 @@ interface Breeze {
 interface Window {
     Q: any;
     breeze: Breeze;
+    _: any;
 }
 
 module BreezeArrow {

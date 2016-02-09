@@ -33,6 +33,7 @@ var BreezeArrow;
 var BreezeArrow;
 (function (BreezeArrow) {
     var breeze = window.breeze;
+    var _ = window._;
     var UriBuilderArrowAdapter = (function () {
         function UriBuilderArrowAdapter() {
             this.name = 'arrow';
@@ -54,10 +55,44 @@ var BreezeArrow;
             var condition = {};
             var expr1Value = this.expr1.visit(context);
             var expr2Value = this.expr2.visit(context);
-            if (this.op.key === 'eq') {
-                condition[expr1Value] = expr2Value;
+            switch (this.op.key) {
+                case 'eq':
+                    condition[expr1Value] = expr2Value;
+                    break;
+                case 'lt':
+                    condition[expr1Value] = { $lt: expr2Value };
+                    break;
+                case 'le':
+                    condition[expr1Value] = { $lte: expr2Value };
+                    break;
+                case 'gt':
+                    condition[expr1Value] = { $gt: expr2Value };
+                    break;
+                case 'ge':
+                    condition[expr1Value] = { $gte: expr2Value };
+                    break;
+                case 'ne':
+                    condition[expr1Value] = { $ne: expr2Value };
+                    break;
+                case 'in':
+                    condition[expr1Value] = { $in: expr2Value };
+                    break;
             }
             return condition;
+        },
+        andOrPredicate: function (context) {
+            var predicates = this.preds.map(function (predicate) {
+                return predicate.visit(context);
+            });
+            console.log(predicates);
+            if (this.op.key === 'and') {
+                console.log('and');
+                return _.merge.apply(_, predicates);
+            }
+            else if (this.op.key === 'or') {
+                console.log('or');
+                return { $or: predicates };
+            }
         },
         propExpr: function (context) {
             var entityType = context.entityType;

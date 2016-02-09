@@ -27,6 +27,7 @@
   "dependencies": {
     "q": "^1.4.1",
     "breeze-client": "^1.5.4",
-    "breeze-client-labs": "^1.5.8"
+    "breeze-client-labs": "^1.5.8",
+    "lodash": "^4.3.0"
   }
 }
