@@ -18,6 +18,7 @@ module BreezeArrow {
 
     var Q: any = window.Q;
     var breeze: Breeze = window.breeze;
+    var _: any = window._;
 
     class ArrowAdapter extends breeze.AbstractDataServiceAdapter {
         name: string;
@@ -74,48 +75,70 @@ module BreezeArrow {
 
         saveChanges(saveContext: any, saveBundle: any) {
             var adapter: any = saveContext.adapter = this;
-            var deferred: any = Q.defer();
             saveBundle = adapter._prepareSaveBundle(saveContext, saveBundle);
 
-            return Q.all(saveBundle.map(function (entity) {
-                var bundle: string = JSON.stringify(saveBundle);
+            return Q
+                .all(saveBundle.map(function (entity: any) {
+                    var deferred: any = Q.defer();
+                    var bundle: string = JSON.stringify(entity, ignoreEntityMetadataFields);
 
-                var url: string = saveContext.dataService.qualifyUrl(saveContext.resourceName);
-                console.log(url);
 
-                this.xhr.ajax({
-                    type: 'PUT',
-                    url: url,
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    data: bundle,
-                    success: function(httpResponse: any) {
-                        httpResponse.saveContext = saveContext;
-                        var data = httpResponse.data;
-                        var saveResult = adapter._prepareSaveResult(saveContext, data);
-                        saveResult.httpResponse = httpResponse;
-                        deferred.resolve(saveResult);
-                    },
-                    error: function(httpResponse: any) {
-                        httpResponse.saveContext = saveContext;
-                        deferred.reject(httpResponse);
-                    }
+                    var url: string = saveContext.dataService.qualifyUrl(
+                        entity.entityType.defaultResourceName + '/' +
+                        entity.entityAspect._entityKey.values[0]
+                    );
+
+                    adapter.xhr.ajax(adapter.saveRequest({
+                        type: 'PUT',
+                        url: url,
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: bundle,
+                        success: function(httpResponse: any) {
+                            httpResponse.saveContext = saveContext;
+                            var data = httpResponse.data;
+                            var saveResult = adapter._prepareSaveResult(saveContext, data);
+                            saveResult.httpResponse = httpResponse;
+                            deferred.resolve({
+                                httpResponse: httpResponse,
+                                entity: JSON.parse(bundle)
+                            });
+                        },
+                        error: function(httpResponse: any) {
+                            httpResponse.saveContext = saveContext;
+                            deferred.reject(httpResponse);
+                        }
+                    }));
+
+                    return deferred.promise;
+                }))
+                .then(function (responses: any) {
+                    var result: any = {
+                        entities: _.pluck(responses, 'entity'),
+                        keyMappings: [],
+                        httpResponse: responses[0].httpResponse
+                    };
+                    return result;
                 });
+        }
 
-                return deferred.promise;
-            }));
-        };
+        saveRequest(params: any) {
+            return params;
+        }
 
         _prepareSaveBundle(saveContext: Object, saveBundle: any) {
             return saveBundle.entities;
         }
 
         _prepareSaveResult(saveContext: Object, data: Object) {
-            console.log('data', data);
             return {};
         }
     }
 
     breeze.config.registerAdapter('dataService', ArrowAdapter);
+
+    function ignoreEntityMetadataFields(key: any, value: any) {
+        return value && value._backingStore;
+    }
 
 }

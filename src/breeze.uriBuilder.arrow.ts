@@ -32,6 +32,10 @@ module BreezeArrow {
                 url += '&limit=' + entityQuery.takeCount;
             }
 
+            if (entityQuery.orderByClause) {
+                url += '&order=' + encodeURIComponent(whereClause(entityQuery));
+            }
+
             return url;
         }
     }
@@ -83,6 +87,16 @@ module BreezeArrow {
         litExpr: function (context: any) {
             return this.value;
         }
+    }
+
+    function whereClause(entityQuery: any): string {
+        return entityQuery
+            .orderByClause
+            .items
+            .map(function(item: any) {
+                return (item.isDesc ? '-' : '') + item.propertyPath;
+            })
+            .join(',');
     }
 
     breeze.config.registerAdapter('uriBuilder', UriBuilderArrowAdapter);

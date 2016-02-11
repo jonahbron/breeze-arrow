@@ -7,6 +7,7 @@ var BreezeArrow;
 (function (BreezeArrow) {
     var Q = window.Q;
     var breeze = window.breeze;
+    var _ = window._;
     var ArrowAdapter = (function (_super) {
         __extends(ArrowAdapter, _super);
         function ArrowAdapter() {
@@ -55,13 +56,14 @@ var BreezeArrow;
         };
         ArrowAdapter.prototype.saveChanges = function (saveContext, saveBundle) {
             var adapter = saveContext.adapter = this;
-            var deferred = Q.defer();
             saveBundle = adapter._prepareSaveBundle(saveContext, saveBundle);
-            return Q.all(saveBundle.map(function (entity) {
-                var bundle = JSON.stringify(saveBundle);
-                var url = saveContext.dataService.qualifyUrl(saveContext.resourceName);
-                console.log(url);
-                this.xhr.ajax({
+            return Q
+                .all(saveBundle.map(function (entity) {
+                var deferred = Q.defer();
+                var bundle = JSON.stringify(entity, ignoreEntityMetadataFields);
+                var url = saveContext.dataService.qualifyUrl(entity.entityType.defaultResourceName + '/' +
+                    entity.entityAspect._entityKey.values[0]);
+                adapter.xhr.ajax(adapter.saveRequest({
                     type: 'PUT',
                     url: url,
                     dataType: 'json',
@@ -72,27 +74,42 @@ var BreezeArrow;
                         var data = httpResponse.data;
                         var saveResult = adapter._prepareSaveResult(saveContext, data);
                         saveResult.httpResponse = httpResponse;
-                        deferred.resolve(saveResult);
+                        deferred.resolve({
+                            httpResponse: httpResponse,
+                            entity: JSON.parse(bundle)
+                        });
                     },
                     error: function (httpResponse) {
                         httpResponse.saveContext = saveContext;
                         deferred.reject(httpResponse);
                     }
-                });
+                }));
                 return deferred.promise;
-            }));
+            }))
+                .then(function (responses) {
+                var result = {
+                    entities: _.pluck(responses, 'entity'),
+                    keyMappings: [],
+                    httpResponse: responses[0].httpResponse
+                };
+                return result;
+            });
         };
-        ;
+        ArrowAdapter.prototype.saveRequest = function (params) {
+            return params;
+        };
         ArrowAdapter.prototype._prepareSaveBundle = function (saveContext, saveBundle) {
             return saveBundle.entities;
         };
         ArrowAdapter.prototype._prepareSaveResult = function (saveContext, data) {
-            console.log('data', data);
             return {};
         };
         return ArrowAdapter;
     })(breeze.AbstractDataServiceAdapter);
     breeze.config.registerAdapter('dataService', ArrowAdapter);
+    function ignoreEntityMetadataFields(key, value) {
+        return value && value._backingStore;
+    }
 })(BreezeArrow || (BreezeArrow = {}));
 var BreezeArrow;
 (function (BreezeArrow) {
@@ -115,6 +132,9 @@ var BreezeArrow;
             }
             if (entityQuery.takeCount) {
                 url += '&limit=' + entityQuery.takeCount;
+            }
+            if (entityQuery.orderByClause) {
+                url += '&order=' + encodeURIComponent(whereClause(entityQuery));
             }
             return url;
         };
@@ -169,5 +189,14 @@ var BreezeArrow;
             return this.value;
         }
     };
+    function whereClause(entityQuery) {
+        return entityQuery
+            .orderByClause
+            .items
+            .map(function (item) {
+            return (item.isDesc ? '-' : '') + item.propertyPath;
+        })
+            .join(',');
+    }
     breeze.config.registerAdapter('uriBuilder', UriBuilderArrowAdapter);
 })(BreezeArrow || (BreezeArrow = {}));
