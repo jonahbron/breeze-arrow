@@ -1,6 +1,6 @@
 {
   "name": "breeze-arrow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Breeze JS data service adapter for connecting to Node applications built with the Appcelerator Arrow framework",
   "keywords": ["breeze", "breezejs", "arrow", "arrowdb", "appcelerator"],
   "homepage": "https://github.com/jonahbron/breeze-arrow",
