@@ -136,6 +136,9 @@ var BreezeArrow;
             if (entityQuery.orderByClause) {
                 url += '&order=' + encodeURIComponent(whereClause(entityQuery));
             }
+            if (entityQuery.selectClause) {
+                url += '&sel=' + encodeURIComponent(selectClause(entityQuery));
+            }
             return url;
         };
         return UriBuilderArrowAdapter;
@@ -197,6 +200,14 @@ var BreezeArrow;
             return (item.isDesc ? '-' : '') + item.propertyPath;
         })
             .join(',');
+    }
+    function selectClause(entityQuery) {
+        var sel = {};
+        var properties = entityQuery.selectClause.propertyPaths;
+        for (var i = 0; i < properties.length; i++) {
+            sel[properties[i]] = true;
+        }
+        return JSON.stringify(sel);
     }
     breeze.config.registerAdapter('uriBuilder', UriBuilderArrowAdapter);
 })(BreezeArrow || (BreezeArrow = {}));

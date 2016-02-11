@@ -36,6 +36,10 @@ module BreezeArrow {
                 url += '&order=' + encodeURIComponent(whereClause(entityQuery));
             }
 
+            if (entityQuery.selectClause) {
+                url += '&sel=' + encodeURIComponent(selectClause(entityQuery));
+            }
+
             return url;
         }
     }
@@ -97,6 +101,15 @@ module BreezeArrow {
                 return (item.isDesc ? '-' : '') + item.propertyPath;
             })
             .join(',');
+    }
+
+    function selectClause(entityQuery: any): string {
+        var sel: any = {};
+        var properties: Array<any> = entityQuery.selectClause.propertyPaths;
+        for (var i = 0; i < properties.length; i++) {
+            sel[properties[i]] = true;
+        }
+        return JSON.stringify(sel);
     }
 
     breeze.config.registerAdapter('uriBuilder', UriBuilderArrowAdapter);
